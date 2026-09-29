@@ -6,26 +6,20 @@ using UnityEngine;
 public class TowerAttackInit : MonoBehaviour
 {
     private AttackTypes attackLogic;
-    private EnemyList enemyList;
-    private Transform target;
-    [SerializeField]
+    [SerializeField] private Transform target; // DO NOT FORGET TO HIDE AGAIN LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    private TowerStats stats;
     private MonoBehaviour otherAttack;
     void Start()
     {
         attackLogic = GetComponent<AttackTypes>();
-        enemyList = GetComponent<EnemyList>();
-        //stats = GetComponent<TowerStats>();
+        stats = GetComponent<TowerStats>();
 
-    }
-    public void GiveTarget(Transform target)
-    {
-        this.target = target.transform;
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
-        if (target != null)
+        if (target != null && attackLogic.isDone == true)
         {
             StartCoroutine(StartAttack());
         }
@@ -36,7 +30,8 @@ public class TowerAttackInit : MonoBehaviour
     }
     private IEnumerator StartAttack()
     {
-        yield return StartCoroutine(attackLogic.DoAttack());
+        EnemyList.GetEnemy(stats.targetType, DetectRange.FindOverlap(transform.position, stats.range));
+        yield return StartCoroutine(attackLogic.DoAttack(stats.attackSpeed, target.position));
     }
     
 
