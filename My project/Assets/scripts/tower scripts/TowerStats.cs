@@ -1,23 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
-public class TowerStats : MonoBehaviour
+[CreateAssetMenu(menuName = "TD/towerstats")]
+public class TowerStats : ScriptableObject
 {
     public TargetType targetType {  get; private set; }
-    
-    public float attackSpeed {  get; private set; }
-    public float damage { get; private set; }
-    public float range 
-    {
-        get => range;
-        private set
-        {
-            range = value;
-        }
-    }
-    private void Start()
-    {
-        targetType = TargetType.first;
-    }
+
+    [SerializeField] private float attackSpeed;
+    public float AttackSpeed { get => attackSpeed; set => attackSpeed = value;  }
+    [SerializeField] private int damage;
+    public int Damage { get => damage; set => damage = value;  }
+    [SerializeField] private float range;
+    public float Range { get => range; set => range = value; }
 }

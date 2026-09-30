@@ -5,11 +5,15 @@ using UnityEngine;
 public abstract class AttackTypes : MonoBehaviour
 {
     public bool isDone { get; private set; } //exists for potential external active attack checks, e.g. for a target switch script on the tower
-    public IEnumerator DoAttack(float cooldown, Vector2 target)
+    private void Awake()
     {
-        isDone = false;
-        yield return StartCoroutine(Attack(cooldown, target));
         isDone = true;
     }
-    protected abstract IEnumerator Attack(float cooldown, Vector2 target);
+    public IEnumerator DoAttack(float cooldown, GameObject target, int damage)
+    {
+        isDone = false;
+        yield return StartCoroutine(Attack(cooldown, target, damage));
+        isDone = true;
+    }
+    protected abstract IEnumerator Attack(float cooldown, GameObject target, int damage);
 }

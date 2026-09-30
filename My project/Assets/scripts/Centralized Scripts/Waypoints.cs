@@ -5,5 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TD/MapData")]
 public class Waypoints : ScriptableObject
 {
-    public Vector2[] waypoints;
+    [SerializeField] private Vector2[] actualWaypoints;
+    public IReadOnlyList<Vector2> waypoints => actualWaypoints;
+
 }

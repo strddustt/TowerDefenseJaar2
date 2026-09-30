@@ -5,15 +5,17 @@ using UnityEngine;
 
 public class ProjectileAttack : AttackTypes
 {
-    private Projectile[] projectiles;
-    public int activeProjectiles = 0;
+    private Projectile[] projectilesArray;
+    private Queue<Projectile> projectiles = new Queue<Projectile>();
     [SerializeField] private GameObject projectilePrefab;
     // Start is called before the first frame update
     void Start()
     {
-        projectiles = GetComponentsInChildren<Projectile>();
-        
-
+        projectilesArray = GetComponentsInChildren<Projectile>(true);
+        for (int i = 0; i < projectilesArray.Length; i++ )
+        {
+            projectiles.Enqueue(projectilesArray[i]);
+        }
     }
 
     // Update is called once per frame
@@ -21,17 +23,26 @@ public class ProjectileAttack : AttackTypes
     {
         
     }
-    protected override IEnumerator Attack(float cooldown, Vector2 target)
+    protected override IEnumerator Attack(float cooldown, GameObject target, int damage)
     {
-        projectiles[activeProjectiles].gameObject.SetActive(true);
-        projectiles[activeProjectiles].target = target;
-        projectiles[activeProjectiles].projectileHit += ProjectileHit;
-        activeProjectiles++;
+
+        Projectile projectile = projectiles.Dequeue();
+        EnemyRuntimeStats stats = target.GetComponent<EnemyRuntimeStats>();
+        projectile.gameObject.SetActive(true);
+        projectile.Init(damage, PredictTarget.calculate(stats, projectile.Speed, this.transform.position));
+        projectile.projectileHit += ProjectileHit;
         yield return new WaitForSeconds(cooldown);
+        if (projectiles.Count == 0)
+        {
+            Debug.LogWarning("projectile pool too small");
+            yield break;
+        }
     }
     private void ProjectileHit(Projectile projectile)
     {
-        activeProjectiles--;
+        projectiles.Enqueue(projectile);
+        projectile.projectileHit -= ProjectileHit;
         projectile.gameObject.transform.position = transform.position;
+        projectile.gameObject.SetActive(false);
     }
 }

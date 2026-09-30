@@ -1,35 +1,48 @@
-using NUnit.Framework.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Jobs.LowLevel.Unsafe;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyList : MonoBehaviour
 {
-    public static List<EnemyStats>[] enemies { get; private set; }
+    public static List<EnemyRuntimeStats>[] enemies { get; private set; }
     public static void Clear(int i) => enemies[i].Clear();
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() => Array.ForEach(enemies, list => list.Clear());
-    void Start()
+    private static void ResetStatics()
     {
-        enemies = new List<EnemyStats>[transform.childCount];
-        for (int i = 0; i < enemies.Length; i++ )
+        if (enemies != null)
         {
-            enemies[i] = new List<EnemyStats>();
+            Array.ForEach(enemies, list => list.Clear());
         }
     }
-    public void AddEnemy (GameObject enemy, int index)
+
+    public static void Init()
     {
-        EnemyStats enemyStats= enemy.GetComponent<EnemyStats>();
-        enemies[index].Add(enemyStats);
+        if (enemies == null)
+        {
+            enemies = new List<EnemyRuntimeStats>[OnLoadManager.GetWaypoints().Length];
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                enemies[i] = new List<EnemyRuntimeStats>();
+            }
+            Debug.Log(enemies.Length);
+        }
     }
-    public void RemoveEnemy (GameObject enemy, int index)
+    public static void AddEnemy (GameObject enemy, int index)
     {
-        EnemyStats enemyStats = enemy.GetComponent<EnemyStats>();
-        enemies[index].Remove(enemyStats);
+        EnemyRuntimeStats stats = enemy.GetComponent<EnemyRuntimeStats>();
+        enemies[index].Add(stats);
+    }
+    public static void RemoveEnemy (GameObject enemy, int index)
+    {
+        EnemyRuntimeStats stats = enemy.GetComponent<EnemyRuntimeStats>();
+        enemies[index].Remove(stats);
+    }
+    public static void SwitchIndex(GameObject enemy, int index)
+    {
+        EnemyRuntimeStats stats = enemy.GetComponent<EnemyRuntimeStats>();
+        enemies[index - 1].Remove(stats);
+        enemies[index].Add(stats);
     }
     /// <summary>
     /// this script checks sections of waypoints for enemies, only those given by a tower's listed visible indexes. for first, it iterates backwards, from the furthest point.
@@ -62,7 +75,7 @@ public class EnemyList : MonoBehaviour
             var range = ranges[i];
             foreach (var enemy in enemies[range.index])
             {
-                if (enemy.currentPercentage >= range.start && enemy.currentPercentage <= range.end)
+                if (enemy.pathPercentage >= range.start && enemy.pathPercentage <= range.end)
                 {
                     float metric = GetMetric(enemy, type);
                     bool better = target == null || (wantMax ? metric > best : metric < best);
@@ -80,11 +93,11 @@ public class EnemyList : MonoBehaviour
 
         return target;
     }
-    private static float GetMetric(EnemyStats e, TargetType type)
+    private static float GetMetric(EnemyRuntimeStats e, TargetType type)
     {
         return type switch
         {
-            TargetType.first or TargetType.last => e.currentPercentage,
+            TargetType.first or TargetType.last => e.pathPercentage,
             TargetType.strongest or TargetType.weakest => e.hp,
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };

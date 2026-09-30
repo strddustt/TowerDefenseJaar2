@@ -10,22 +10,18 @@ using UnityEngine.Analytics;
 public static class DetectRange
 {
     private static Vector2[] waypoints;
-    public static void FindWaypoints(Waypoints points)
-    {
-        waypoints = points.waypoints;
-    }
-    
+
 
     /// <summary>
     /// simple dot -> leg -> normalized t calculation. doesn't actually solve for the vectors of the overlap points, only their % along the path expressed as a decimal value between 0 and 1 (clamped), named t_a & t_b.
     /// outputs everything into a list starting from the first waypoint, and that list can then be passed to enemylist's GetEnemy to retrieve a target. 
     /// does not store segments it cannot see at all, also doesn't work if the circumference just barely grazes the path, because that'd be annoying to manage and would not be noticeable if it happened
-    /// !!!!!!!make sure to actually call if towerstats.range ever changes. since range is a private set, just include a refresh of this function in the function you'll inevitably use for the private set!!!!!!!!!
-    /// !!!!!!!!!! TARGETING WILL NOT WORK IF YOU DON'T !!!!!!!!!!!!!!!
+    /// currently calls every attack, no data is stored
     /// </summary>
-    public static List<indexData> FindOverlap(Vector2 position, float range)
+    public static void FindOverlap(Vector2 position, float range, List<indexData> results)
     {
-        List<indexData> indexes = new List<indexData>();
+        results.Clear();
+        waypoints = OnLoadManager.GetWaypoints();
         int i = 1;
         foreach (var waypoint in waypoints)
         {
@@ -58,7 +54,7 @@ public static class DetectRange
                     newindex.start = t_a;
                     newindex.end = t_b;
                     newindex.index = i - 1;
-                    indexes.Add(newindex);
+                    results.Add(newindex);
 
                 }
                 
@@ -66,6 +62,5 @@ public static class DetectRange
             i++;
 
         }
-        return indexes;
     }
 }

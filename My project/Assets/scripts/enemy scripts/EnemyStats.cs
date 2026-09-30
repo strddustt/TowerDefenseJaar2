@@ -2,15 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyStats : MonoBehaviour
+[CreateAssetMenu(menuName = "TD/Enemy Stats")]
+public class EnemyStats : ScriptableObject
 {
-    [SerializeField] public int hp {  get; private set; }
-    [SerializeField] public int maxHp { get; private set; }
-    [SerializeField] public float speed { get; private set; }
-    public float currentPercentage { get; private set; }
-
-    public void TakeDamage(int value)
-    {
-        hp -= value;
-    }
+    [SerializeField] private int maxHp;
+    public int MaxHp { get { return maxHp; } private set => maxHp = value;  }
+    [SerializeField] private float speed;
+    public float Speed { get { return speed; } private set => speed = value; }
 }

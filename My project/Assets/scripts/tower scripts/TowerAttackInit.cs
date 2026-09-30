@@ -6,22 +6,22 @@ using UnityEngine;
 public class TowerAttackInit : MonoBehaviour
 {
     private AttackTypes attackLogic;
-    [SerializeField] private Transform target; // DO NOT FORGET TO HIDE AGAIN LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    private TowerStats stats;
+    private readonly List<indexData> sightlines = new List<indexData>();
+    [SerializeField] private GameObject target; // DO NOT FORGET TO HIDE AGAIN LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    private TowerRuntimeStats stats;
     private MonoBehaviour otherAttack;
     void Start()
     {
         attackLogic = GetComponent<AttackTypes>();
-        stats = GetComponent<TowerStats>();
-
+        stats = GetComponent<TowerRuntimeStats>();
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
-        if (target != null && attackLogic.isDone == true)
+        if (attackLogic.isDone == true)
         {
-            StartCoroutine(StartAttack());
+            FindTarget();
         }
         else
         {
@@ -30,9 +30,18 @@ public class TowerAttackInit : MonoBehaviour
     }
     private IEnumerator StartAttack()
     {
-        EnemyList.GetEnemy(stats.targetType, DetectRange.FindOverlap(transform.position, stats.range));
-        yield return StartCoroutine(attackLogic.DoAttack(stats.attackSpeed, target.position));
+        Debug.Log("found enemy");
+        yield return StartCoroutine(attackLogic.DoAttack(stats.attackSpeed, target, stats.damage));
     }
-    
+    private void FindTarget()
+    {
+        DetectRange.FindOverlap(transform.position, stats.range, sightlines);
+        target = EnemyList.GetEnemy(stats.targetType, sightlines);
+        if (target == null)
+        {
+            return;
+        }
+            StartCoroutine(StartAttack());
+    }
 
 }
