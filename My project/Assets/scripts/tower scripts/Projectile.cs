@@ -8,6 +8,7 @@ using UnityEngine.Events;
 public class Projectile : MonoBehaviour
 {
     private bool isSet = false;
+    private bool scheduleHitDestruction = false;
     private bool scheduleDestruction = false;
     public event Action<Projectile> projectileHit; //events pmo
     [SerializeField] private float speed = 3;
@@ -15,14 +16,17 @@ public class Projectile : MonoBehaviour
     HitData data = new HitData();
     
     private Vector2 target;
+    private GameObject targetObject;
     
-    public void Init(int damage, Vector2 target)
+    public void Init(int damage, Vector2 target, GameObject targetObject)
     {
         if (isSet && target != this.target) { Debug.LogWarning("target set more than once"); return; }
         isSet = true;
+        this.targetObject = targetObject;
         data.damage = damage;
         this.target = target;
         data.tower = transform.parent.gameObject;
+        DeathHandler.onDeath += EnemyDied;
     }
 
     void Start()
@@ -36,25 +40,39 @@ public class Projectile : MonoBehaviour
         transform.position = Vector2.MoveTowards(transform.position, target, Time.deltaTime * speed);
         if ((Vector2)transform.position == target)
         {
-            scheduleDestruction = true;
+            scheduleHitDestruction = true;
         }
     }
     private void LateUpdate()
     {
-        if (scheduleDestruction) { EndLifeCycle(); }
+        if (scheduleHitDestruction) { EndLifeCycle(true); }
+        if (scheduleDestruction) { EndLifeCycle(false); }
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.TryGetComponent<IDamageable>(out var target))
         {
             target.TakeHit(data);
-            EndLifeCycle();
+            scheduleHitDestruction = true;
         }
     }
-    public void EndLifeCycle()
+    public void EndLifeCycle(bool hit)
     {
-        scheduleDestruction = false;
+        scheduleHitDestruction = false;
         isSet = false;
-        projectileHit?.Invoke(this);
+        if (hit)
+            projectileHit?.Invoke(this);
+        else
+            Destroy(gameObject);
+    }
+    private void EnemyDied(GameObject target, int index)
+    {
+        if (target == targetObject)
+            scheduleDestruction = true;
+        
+    }
+    private void OnDisable()
+    {
+        DeathHandler.onDeath -= EnemyDied;
     }
 }

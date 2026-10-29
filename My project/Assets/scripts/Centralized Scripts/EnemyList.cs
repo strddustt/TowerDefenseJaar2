@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
-public class EnemyList : MonoBehaviour
+public static class EnemyList
 {
     public static List<EnemyRuntimeStats>[] enemies { get; private set; }
     public static void Clear(int i) => enemies[i].Clear();
@@ -13,7 +15,9 @@ public class EnemyList : MonoBehaviour
         if (enemies != null)
         {
             Array.ForEach(enemies, list => list.Clear());
+            enemies = null;
         }
+        DeathHandler.onDeath -= RemoveEnemy;
     }
 
     public static void Init()
@@ -25,8 +29,10 @@ public class EnemyList : MonoBehaviour
             {
                 enemies[i] = new List<EnemyRuntimeStats>();
             }
-            Debug.Log(enemies.Length);
         }
+        DeathHandler.onDeath -= RemoveEnemy;
+        DeathHandler.onDeath += RemoveEnemy;
+
     }
     public static void AddEnemy (GameObject enemy, int index)
     {
@@ -41,57 +47,95 @@ public class EnemyList : MonoBehaviour
     public static void SwitchIndex(GameObject enemy, int index)
     {
         EnemyRuntimeStats stats = enemy.GetComponent<EnemyRuntimeStats>();
-        enemies[index - 1].Remove(stats);
-        enemies[index].Add(stats);
+        if (enemies[index - 1].Remove(stats)) enemies[index].Add(stats);
+    }
+    public static bool AreEnemiesAlive()
+    {
+        foreach (List<EnemyRuntimeStats> list in enemies)
+        {
+            if (list.Count != 0)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     /// <summary>
     /// this script checks sections of waypoints for enemies, only those given by a tower's listed visible indexes. for first, it iterates backwards, from the furthest point.
     /// breaks IMMEDIATELY upon finding the required enemy in a segment
     /// for last, the iteration is mirrored, the idea is similar.
     /// strongest and weakest do iterate over the entire list. if you find the tower targeting the wrong enemy, check first whether strongest or weakest works. if it does, the loop breaks when it shouldn't
-    /// depends on the hardcoded "GetMetric" function, and doesn't handle random targeting yet. should be easy to code if need be.
+    /// depends on the hardcoded "GetMetric" function.
     /// 
     /// ASSUMES THE SECTIONS IN THE LIST IN THE ARGUMENT ARE SORTED LOW TO HIGH
     /// </summary>
     /// <param name="type"></param>
     /// <param name="ranges"></param>
     /// <returns></returns>
-    public static GameObject GetEnemy(TargetType type, List<indexData> ranges)
+    public static GameObject GetEnemy(TargetType type, List<indexData> ranges, HashSet<EnemyRuntimeStats> ignoredTargets = null)
     {
-        GameObject target = null;
-        float best = 0f;
-        bool wantMax = type == TargetType.first || type == TargetType.strongest;
-
-        bool reverseIterate = type == TargetType.first;
-        bool canBreakEarly = type == TargetType.first || type == TargetType.last;
-
-        int startI = reverseIterate ? ranges.Count - 1 : 0;
-        int endI = reverseIterate ? -1 : ranges.Count;
-        int step = reverseIterate ? -1 : 1;
-
-
-        for (int i = startI; i != endI; i += step)
+        if (type == TargetType.random)
         {
-            var range = ranges[i];
-            foreach (var enemy in enemies[range.index])
+            List<EnemyRuntimeStats> possibleTargets = new List<EnemyRuntimeStats>();
+            for (int i = 0; i != ranges.Count; i++)
             {
-                if (enemy.pathPercentage >= range.start && enemy.pathPercentage <= range.end)
+                var range = ranges[i];
+                foreach (var enemy in enemies[range.index])
                 {
-                    float metric = GetMetric(enemy, type);
-                    bool better = target == null || (wantMax ? metric > best : metric < best);
-                    if (better)
+                    if (ignoredTargets?.Contains(enemy) == true)
                     {
-                        best = metric;
-                        target = enemy.gameObject;
+                        continue;
+                    }
+                    if (enemy.pathPercentage >= range.start && enemy.pathPercentage <= range.end && !enemy.isDoomed)
+                    {
+                        possibleTargets.Add(enemy);
                     }
                 }
             }
-
-            if (target != null && canBreakEarly)
-                break;
+            if (possibleTargets.Count > 0) 
+                return possibleTargets[UnityEngine.Random.Range(0, possibleTargets.Count)].gameObject;
+            else return null;
         }
+        else
+        {
+            GameObject target = null;
+            float best = 0f;
+            bool wantMax = type == TargetType.first || type == TargetType.strongest;
 
-        return target;
+            bool reverseIterate = type == TargetType.first;
+            bool canBreakEarly = type == TargetType.first || type == TargetType.last;
+
+            int startI = reverseIterate ? ranges.Count - 1 : 0;
+            int endI = reverseIterate ? -1 : ranges.Count;
+            int step = reverseIterate ? -1 : 1;
+
+            for (int i = startI; i != endI; i += step)
+            {
+                var range = ranges[i];
+                foreach (var enemy in enemies[range.index])
+                {
+                    if (ignoredTargets?.Contains(enemy) == true)
+                    {
+                        continue;
+                    }
+                    if (enemy.pathPercentage >= range.start && enemy.pathPercentage <= range.end && !enemy.isDoomed)
+                    {
+
+                        float metric = GetMetric(enemy, type);
+                        bool better = target == null || (wantMax ? metric > best : metric < best);
+                        if (better)
+                        {
+                            best = metric;
+                            target = enemy.gameObject;
+                        }
+                    }
+                }
+
+                if (target != null && canBreakEarly)
+                    break;
+            }
+            return target;
+        }
     }
     private static float GetMetric(EnemyRuntimeStats e, TargetType type)
     {

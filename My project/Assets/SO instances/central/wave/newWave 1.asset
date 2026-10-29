@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 911f9ae95c5898c4c9ea16854c2f8f67, type: 3}
+  m_Name: newWave 1
+  m_EditorClassIdentifier: 
+  values:
+  - enemyType: {fileID: 7484358024324574580, guid: 895ae9529c8104a48ac59ce78f80d659, type: 3}
+    count: 10
+    delay: 0
+    interval: 0.5
+  - enemyType: {fileID: 7484358024324574580, guid: 07bbf3b7b0b54ab47bf4a24b504c10ab, type: 3}
+    count: 5
+    delay: 15
+    interval: 1
+  waveReward: 150
+  time: 45

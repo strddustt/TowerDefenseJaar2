@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cc7f84152619694ebd84c8573dc9aee, type: 3}
   m_Name: TestStats
   m_EditorClassIdentifier: 
-  maxHp: 3
+  maxHp: 5
   speed: 1
+  hitboxSize: 0.5

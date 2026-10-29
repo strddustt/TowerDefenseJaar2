@@ -18,7 +18,7 @@ public class EnemyMovement : MonoBehaviour
     void Update()
     {
         transform.position = Vector2.MoveTowards(transform.position, waypoints[index + 1], stats.speed * Time.deltaTime);
-        float progress = Vector2.Dot((Vector2)transform.position - waypoints[index], path) / path.sqrMagnitude;
+        float progress = CalculateProgressPoint.Calculate(transform.position, index);
         progress = Mathf.Clamp01(progress);
         stats.SetPercentage(progress);
         if ((Vector2)transform.position == waypoints[index+1])
@@ -32,7 +32,8 @@ public class EnemyMovement : MonoBehaviour
         EnemyList.SwitchIndex(gameObject, index);
         if (index + 1 >= waypoints.Length)
         {
-            enabled = false; // stop Update from running while waiting for destruction
+            stats.CallDeath();
+            enabled = false;
             return;
         }
         path = waypoints[index + 1] - waypoints[index];

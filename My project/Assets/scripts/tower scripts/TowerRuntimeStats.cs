@@ -9,6 +9,11 @@ public class TowerRuntimeStats : MonoBehaviour
     public int damage { get; private set; }
     public float attackSpeed { get; private set;  }
     public float range { get; private set; }
+    public float footprintRadius
+    {
+        get => stats.FootprintRadius;
+        private set => footprintRadius = value;
+    }
     public TargetType targetType { get; private set; }
     // Start is called before the first frame update
     void Start()
@@ -37,5 +42,9 @@ public class TowerRuntimeStats : MonoBehaviour
     public void SetTargeting(TargetType type)
     {
         targetType = type;
+    }
+    public void SetFootprint(float value)
+    {
+        footprintRadius += value;
     }
 }
