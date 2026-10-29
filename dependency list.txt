@@ -1,0 +1,65 @@
+class EnemyStats:
+int MaxHp readonly
+float Speed readonly
+
+class OnLoadManager:
+Vector2[] Waypoints readonly
+
+class Waypoints:
+IReadOnlyList<Vector2> waypoints readonly
+
+class TowerStats:
+float AttackSpeed readonly
+int Damage readonly
+float Range readonly
+float FootprintRadius readonly
+
+class TowerRuntimeStats:
+int damage read & write
+float attackSpeed read & write
+float range read & write
+footprintRadius read & write
+
+class EnemyRuntimeStats:
+bool isDoomed read & write
+int currentWaypoint read & write
+int hp read & write
+hitboxSize readonly
+float pathPercentage read & write
+float speed read & write
+
+class PlacementCheck:
+float radius writeonly
+
+class Cah:
+cash read & write
+
+class WaveSO:
+List<SpawnValues> values read & write
+int waveReward read & write
+int time read & write
+
+class Projectile:
+float Speed read & write
+
+class WaveSpawner:
+List<WaveSO> waves serialized write
+int ActiveSegments readonly
+
+class TowerAttackInit:
+HashSet<EnemyRuntimeStats> ignoredTargets writeonly
+
+class EnemyList:
+List<EnemyRuntimeStats> enemies read & write
+
+class TowerUpgradeUI:
+bool UICloseFlag writeonly
+
+class UpgradeSO:
+IReadOnlyList<UpgradeStats> Upgrades readonly
+
+class UpgradeButton:
+UpgradeSO upgrades writeonly
+int upgradeIndex read & write
+TowerRuntimeStats stats writeonly
+
