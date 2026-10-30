@@ -6,12 +6,11 @@ using UnityEngine;
 public class UpgradeSO : ScriptableObject
 {
     [SerializeField] private List<UpgradeStats> upgrades = new List<UpgradeStats>();
-    public IReadOnlyList<UpgradeStats> Upgrades => upgrades;
+    public List<UpgradeStats> Upgrades => upgrades;
     [SerializeField] private string description;
     public string Description => description;
 }
-
-
+    
 [System.Serializable]
 public class UpgradeStats
 {
