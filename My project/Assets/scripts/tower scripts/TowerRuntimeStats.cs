@@ -9,11 +9,7 @@ public class TowerRuntimeStats : MonoBehaviour
     public int damage { get; private set; }
     public float attackSpeed { get; private set;  }
     public float range { get; private set; }
-    public float footprintRadius
-    {
-        get => stats.FootprintRadius;
-        private set => footprintRadius = value;
-    }
+    public float footprintRadius { get; private set; }
     public TargetType targetType { get; private set; }
     // Start is called before the first frame update
     void Start()
@@ -22,7 +18,6 @@ public class TowerRuntimeStats : MonoBehaviour
         attackSpeed = stats.AttackSpeed;
         range = stats.Range;
         targetType = stats.targetType;
-        
     }
 
     // Update is called once per frame

@@ -19,6 +19,6 @@ public class UpgradeStats
     public float range;
     public float footprint;
     public float cost;
-    public MonoBehaviour ability;
+    public AbilityType ability;
     public string name;
 }

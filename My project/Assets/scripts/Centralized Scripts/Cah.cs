@@ -5,7 +5,7 @@ using UnityEngine;
 public class Cah : MonoBehaviour
 {
     private static CashText textScript;
-    private static int Cash = 0;
+    private static int Cash = 99999;
     public static int cash { get { return Cash; } private set { Cash = value; } }
 
     private void Start()

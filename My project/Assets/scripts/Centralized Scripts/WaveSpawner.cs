@@ -1,14 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class WaveSpawner : MonoBehaviour
 {
     private Coroutine runCheck;
     [SerializeField, Tooltip("Don't use this to add waves unless a desync or wipe happened")] private List<WaveSO> waves = new List<WaveSO>();
+    [SerializeField] private TextMeshProUGUI text;
     public static event Action stoppedSpawning;
     private bool isSkipped = false;
+    public float timer { get; private set; }
+
     private int activeSegments = 0;
     public int ActiveSegments { get { return activeSegments; } private set { activeSegments = value; } }
     private int currentWave = 0;
@@ -16,7 +20,7 @@ public class WaveSpawner : MonoBehaviour
     private void OnEnable()
     {
         StartGame.start += StartTimer;
-        SkipButton.skipped += Skip;
+        ASingleActionCall.skipped += Skip;
     }
 
     private void StartTimer()
@@ -48,15 +52,17 @@ public class WaveSpawner : MonoBehaviour
             activeSegments++;
             StartCoroutine(SpawnSegment(values)); 
         }
-        float timer = 0;
+        timer = 0;
         while (timer < waves[index].time)
         {
             timer += Time.deltaTime;
+            text.text = (waves[index].time - timer).ToString();
             yield return null;
             if (isSkipped)
             {
                 isSkipped = false;
                 timer = waves[index].time;
+                text.text = null;
             }
             
         }
@@ -87,7 +93,8 @@ public class WaveSpawner : MonoBehaviour
 
     private void Skip()
     {
-        isSkipped = true;
+        if (ActiveSegments == 0)
+            isSkipped = true;
     }
 
 
@@ -111,6 +118,6 @@ public class WaveSpawner : MonoBehaviour
     {
         runCheck = null;
         StartGame.start -= StartTimer;
-        SkipButton.skipped -= Skip;
+        ASingleActionCall.skipped -= Skip;
     }
 }

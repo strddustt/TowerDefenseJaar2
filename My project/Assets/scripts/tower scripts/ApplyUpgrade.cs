@@ -1,19 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ApplyUpgrade : MonoBehaviour
+public static class ApplyUpgrade
 {
-    public void Apply(UpgradeStats upgrade, TowerRuntimeStats stats)
+    public static void Apply(UpgradeStats upgrade, TowerRuntimeStats stats)
     {
-        stats.SetDamage(upgrade.damage);
-        stats.SetAttackSpeed(upgrade.attackSpeed);
-        stats.SetRange(upgrade.range);
-        stats.SetFootprint(upgrade.footprint);
+        stats.SetDamage(stats.damage + upgrade.damage);
+        stats.SetAttackSpeed(stats.attackSpeed - upgrade.attackSpeed);
+        stats.SetRange(stats.range + upgrade.range);
+        stats.SetFootprint(stats.footprintRadius + upgrade.footprint);
+
         if (upgrade.ability != null)
-        {
-            stats.gameObject.AddComponent(upgrade.ability.GetType());
-        }
+            upgrade.ability.Apply(stats);
     }
 }
-

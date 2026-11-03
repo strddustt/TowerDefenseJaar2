@@ -8,6 +8,7 @@ public class ProjectileAttack : AttackTypes
     private Projectile[] projectilesArray;
     private Queue<Projectile> projectiles = new Queue<Projectile>();
     private TowerRuntimeStats towerStats;
+    private InstantiatePQueue queue;
     private GameObject targetReference;
     private bool isLastHit;
     private Vector2[] waypoints;
@@ -22,6 +23,7 @@ public class ProjectileAttack : AttackTypes
         towerStats = GetComponent<TowerRuntimeStats>();
         targetList = GetComponent<TowerAttackInit>();
         waypoints = OnLoadManager.GetWaypoints();
+        queue = GetComponent<InstantiatePQueue>();
     }
 
     // Update is called once per frame
@@ -42,8 +44,7 @@ public class ProjectileAttack : AttackTypes
         }
         if (projectiles.Count == 0)
         {
-            Debug.LogWarning("projectile pool too small");
-            yield break;
+            queue.ExpandQueue();
         }
 
         Projectile projectile = projectiles.Peek();
@@ -93,5 +94,13 @@ public class ProjectileAttack : AttackTypes
     public void EnqueueProjectile(Projectile projectile)
     {
         projectiles.Enqueue(projectile);
+    }
+    public void FlushQueue()
+    {
+        foreach (Projectile projectile in projectiles)
+        {
+            projectiles.Dequeue();
+            Destroy(projectile);
+        }
     }
 }

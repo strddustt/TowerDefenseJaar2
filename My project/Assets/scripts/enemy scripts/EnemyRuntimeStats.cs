@@ -23,7 +23,7 @@ public class EnemyRuntimeStats : MonoBehaviour
     public float hitboxSize => stats.HitboxSize;
     public float pathPercentage { get; private set; }
     public float speed { get; private set; }
-    private void Start()
+    private void Awake()
     {
         isDoomed = false;
         deathHandler = GetComponent<DeathHandler>();

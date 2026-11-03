@@ -2,10 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// intended to calculate and create the minimum needed projectiles for its max firerate + 10%, don't have the time for that yet though
-/// obviously only attach this script if the tower has the relevant projectile attack logic
-/// </summary>
 public class InstantiatePQueue : MonoBehaviour
 {
     private ProjectileAttack queueScript;
@@ -21,10 +17,10 @@ public class InstantiatePQueue : MonoBehaviour
             queueScript.EnqueueProjectile(current.GetComponent<Projectile>());
         }
     }
-
-    // Update is called once per frame
-    void Update()
+    
+    public void ExpandQueue()
     {
-        
+        GameObject current = Instantiate(prefab, transform);
+        queueScript.EnqueueProjectile(current.GetComponent<Projectile>());
     }
 }

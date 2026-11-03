@@ -75,4 +75,8 @@ public class Projectile : MonoBehaviour
     {
         DeathHandler.onDeath -= EnemyDied;
     }
+    public void SetSpeed(float speedChange)
+    {
+            speed = speedChange; 
+    }
 }

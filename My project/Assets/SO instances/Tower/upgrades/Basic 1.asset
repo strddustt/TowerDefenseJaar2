@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a63e82abcb5db44992c27baef11c61, type: 3}
+  m_Name: Basic 1
+  m_EditorClassIdentifier: 
+  upgrades:
+  - damage: 1
+    attackSpeed: 0.1
+    range: 0.5
+    footprint: 0
+    cost: 150
+    ability: {fileID: 0}
+    name: damage +3, attack speed -0.1 s, range +0.5
+  - damage: 3
+    attackSpeed: 0.1
+    range: 1
+    footprint: 0
+    cost: 350
+    ability: {fileID: 0}
+    name: damage +3, attack speed -0.1 s, range + 1
+  - damage: 20
+    attackSpeed: 0.1
+    range: 0
+    footprint: 0
+    cost: 1000
+    ability: {fileID: 0}
+    name: damage +20, attack speed -0.1 s
+  - damage: 0
+    attackSpeed: 0.1
+    range: 3
+    footprint: 0
+    cost: 750
+    ability: {fileID: 0}
+    name: attack speed -0.1 s, range + 3
+  - damage: 75
+    attackSpeed: -0.1
+    range: 2
+    footprint: 0
+    cost: 2500
+    ability: {fileID: 0}
+    name: damage +75, attack speed +0.1 s, range + 2
+  description: jack of all trades master of none. balanced stats

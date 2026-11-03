@@ -1,58 +1,76 @@
 using System;
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UpgradeButton : MonoBehaviour
 {
-    private UpgradeSO upgrades;
+    [SerializeField] private Button button;
+    [SerializeField] private TMP_Text label;
+
     public static event Action<int> upgraded;
-    public int upgradeIndex { get; private set; }
+    [SerializeField] private TMP_Text costText; 
+    public int upgradeIndex => tier;
+
+    private UpgradePopup popup;
     private TowerRuntimeStats stats;
-    private TextMeshProUGUI text = new TextMeshProUGUI();
-    private TextMeshProUGUI activeText;
-    // Start is called before the first frame update
-    public void Init(TowerRuntimeStats givenStats, UpgradeSO givenUpgrades)
+    private UpgradeSO path;
+    private int tier; 
+
+    public void Init(UpgradePopup givenPopup, TowerRuntimeStats givenStats, UpgradeSO givenPath)
     {
-        upgrades = givenUpgrades;
+        popup = givenPopup;
         stats = givenStats;
-        upgradeIndex = 0;
-        activeText = Instantiate(text, transform);
-        Vector2 pos = activeText.rectTransform.anchoredPosition;
-        pos.y -= 30;
-        activeText.rectTransform.anchoredPosition = pos;
-        if (upgradeIndex == 0)
-            activeText.text = upgrades.name;
-        else
-            activeText.text = upgrades.Upgrades[upgradeIndex].name;
+        path = givenPath;
+        tier = 0;
+
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(OnPress);
+        Refresh();
     }
 
+    private void Update()
+    {
+        // Grey the button out while the player can't afford the next tier.
+        if (path != null && tier < path.Upgrades.Count)
+            button.interactable = Cah.cash >= path.Upgrades[tier].cost;
+    }
 
     private void OnPress()
     {
-        if (Cah.cash > upgrades.Upgrades[upgradeIndex].cost)
+        if (tier >= path.Upgrades.Count)
+            return;
+
+        UpgradeStats next = path.Upgrades[tier];
+        if (Cah.cash < next.cost)
+            return;
+
+        Cah.AddCash(-(int)next.cost);
+        ApplyUpgrade.Apply(next, stats);
+        tier++;
+        upgraded?.Invoke(tier);
+
+        popup.PathChosen(this);
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        if (tier >= path.Upgrades.Count)
         {
-            upgradeIndex++;
-            upgraded?.Invoke(upgradeIndex);
-            activeText.text = upgrades.Upgrades[upgradeIndex].name;
-            if (upgradeIndex == 0)
-            {
-                Button[] otherButtons = GetComponentsInChildren<Button>();
-                foreach (Button button in otherButtons)
-                {
-                    if (button == GetComponent<Button>())
-                    {
-                        TextMeshProUGUI buttonUI = button.GetComponent<TextMeshProUGUI>();
-                        buttonUI.rectTransform.anchoredPosition = new Vector2(-71.87312f, 0f);
-                        continue;
-                    }
-                    else
-                    {
-                        Destroy(button.gameObject);
-                    }
-                }
-            }
+            label.text = "Maxed";
+            costText.text = "";
+            button.interactable = false;
+            return;
         }
+
+        UpgradeStats next = path.Upgrades[tier];
+        label.text = next.name;
+        costText.text = "$" + next.cost;
+    }
+
+    public void MoveToLeft(RectTransform target, float labelWidth)
+    {
+        SetUpgradePos.MoveLeft(target, button, label);
     }
 }

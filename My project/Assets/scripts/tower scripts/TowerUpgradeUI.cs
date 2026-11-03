@@ -1,63 +1,73 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
+/// <summary>
+/// Put this on the tower. Detects clicks on the tower's click collider with RaycastAll
+/// (so the footprint collider can't block it) and opens/closes the upgrade popup above the tower.
+/// </summary>
 public class TowerUpgradeUI : MonoBehaviour
 {
-    [SerializeField] private GameObject UIPrefab;
-    private GameObject UI;
+    [SerializeField] private UpgradePopup popupPrefab;
+    [SerializeField] private Vector3 popupOffset = new Vector3(0f, 1.5f, 0f);
+    [SerializeField, Tooltip("The collider that counts as 'clicking the tower'. Falls back to the first Collider on this object.")]
+    private Collider2D clickCollider;
+    [SerializeField, Tooltip("Upgrade paths, sorted left to right (same order as the slots in the popup)")]
+    private UpgradeSO[] upgrade = new UpgradeSO[3];
+
     private TowerRuntimeStats stats;
-    [SerializeField, Tooltip("sort paths numbers from left to right")] private UpgradeSO[] upgrade = new UpgradeSO[3];
-    private bool UICloseFlag = true;
-    private int index;
-    // Start is called before the first frame update
-    void Start()
+    private UpgradePopup popup;
+    private Camera cam;
+
+    private void Start()
     {
-        stats = GetComponent<TowerRuntimeStats>(); 
+        stats = GetComponentInChildren<TowerRuntimeStats>();
+        cam = Camera.main;
+        if (clickCollider == null)
+            clickCollider = GetComponent<Collider2D>();
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && UICloseFlag == false && UI != null)
-        {
-            UI.SetActive(false);
-        }
-        UICloseFlag = false;
-    }
-    private void OnMouseDown()
-    {
-        Debug.Log("detected click");
-        UICloseFlag = true;
-        if (UI == null)
-        {
-            UI = Instantiate(UIPrefab);
-            UpgradeButton[] buttons = new UpgradeButton[3];
-            foreach (var button in UI.GetComponentsInChildren<UpgradeButton>())
-            {
-                for (int i =0; i < buttons.Length; i++)
-                {
-                    if (buttons[i].gameObject.transform.position.x < button.gameObject.transform.position.x && buttons[i] != null)
-                    {
-                        UpgradeButton buttonToReplace = buttons[i];
-                        buttons[i] = button;
-                        buttons[i + 1] = buttonToReplace;
-                    }
-                    else
-                        buttons[i] = button;
-                }
-            }
-            for (int i = 0; i < buttons.Length; i++)
-            {
-                buttons[i].Init(stats, upgrade[i]);
-            }
-        }
-        if (UI != null)
-            UI.SetActive(true);
+        if (!Input.GetMouseButtonDown(0))
+            return;
+
+        // Click landed on a UI element (e.g. an upgrade button): not a world click.
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        if (ClickedThisTower())
+            OpenPopup();
+        else
+            ClosePopup();
     }
 
-    public void KeepUIOpen()
+    private bool ClickedThisTower()
     {
-        UICloseFlag = true;
+        Vector2 worldPoint = cam.ScreenToWorldPoint(Input.mousePosition);
+        return clickCollider.OverlapPoint(worldPoint);
+    }
+
+    private void OpenPopup()
+    {
+        Vector3 pos = transform.position + popupOffset;
+        if (popup == null)
+        {
+            popup = Instantiate(popupPrefab, pos, cam.transform.rotation);
+            popup.Init(stats, upgrade);
+        }
+        popup.transform.position = pos;
+        popup.gameObject.SetActive(true);
+    }
+
+    private void ClosePopup()
+    {
+        if (popup != null)
+            popup.gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (popup != null)
+            Destroy(popup.gameObject);
     }
 }

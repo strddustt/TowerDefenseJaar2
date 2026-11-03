@@ -8,6 +8,7 @@ public class Placement : MonoBehaviour
 {
     [SerializeField] private GameObject prefab;
     [SerializeField] private GameObject particles;
+    [SerializeField] private int cost;
     private TowerRuntimeStats stats;
     private GameObject preview;
     private SpriteRenderer previewSprite;

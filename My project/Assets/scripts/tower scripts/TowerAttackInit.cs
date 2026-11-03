@@ -53,6 +53,7 @@ public class TowerAttackInit : MonoBehaviour
         }
         else if (targetExitPercentage == 0)
         {
+            Debug.Log("Enemy found");
             enemyStats = target.GetComponent<EnemyRuntimeStats>();
             foreach (indexData indexData in sightlines)
             {
