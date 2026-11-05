@@ -7,7 +7,7 @@ using UnityEngine;
 public class WaveSpawner : MonoBehaviour
 {
     private Coroutine runCheck;
-    [SerializeField, Tooltip("Don't use this to add waves unless a desync or wipe happened")] private List<WaveSO> waves = new List<WaveSO>();
+    [SerializeField, Tooltip("Don't use this to add waves unless this list got desynced from the scriptable objects")] private List<WaveSO> waves = new List<WaveSO>();
     [SerializeField] private TextMeshProUGUI text;
     public static event Action stoppedSpawning;
     private bool isSkipped = false;
@@ -56,7 +56,7 @@ public class WaveSpawner : MonoBehaviour
         while (timer < waves[index].time)
         {
             timer += Time.deltaTime;
-            text.text = (waves[index].time - timer).ToString();
+            text.text = (waves[index].time - timer).ToString("F0");
             yield return null;
             if (isSkipped)
             {
